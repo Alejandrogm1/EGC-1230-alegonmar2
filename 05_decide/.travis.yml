@@ -4,6 +4,7 @@ services:
   - postgresql
 addons:
   postgresql: "9.4"
+  postgresql: "9.6"
 before_script:
   - psql -U postgres -c "create user decide password 'decide'"
   - psql -U postgres -c "create database test_decide owner decide"
@@ -11,11 +12,21 @@ before_script:
 language: python
 python:
   - "3.6"
+  - "3.8"
 install:
   - pip install -r requirements.txt
   - pip install codacy-coverage
+  - pip install selenium
+  - sudo apt-get install chromium-browser
+  - wget -N https://chromedriver.storage.googleapis.com/87.0.4200.88/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - rm chromedriver_linux64.zip
+  - sudo mv -f chromedriver /usr/bin
+  - sudo chmod +x /usr/bin/chromedriver
 script:
   - cd decide
   - coverage run --branch --source=. ./manage.py test --keepdb --with-xunit
   - coverage xml
   - python-codacy-coverage -r coverage.xml
+  - ./manage.py test authentication
+  - ./manage.py test census
